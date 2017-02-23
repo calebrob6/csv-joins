@@ -1,4 +1,4 @@
-# csvJoins
+# csv-joins
 Small python script for performing different join operations on CSV files.
 
 This script can perform left, right, inner, and full outer joins on two arbitrary CSV files.
