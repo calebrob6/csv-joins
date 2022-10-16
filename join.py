@@ -12,52 +12,47 @@ import csv
 import argparse
 
 
-def load_csv(fn, header=False, DELIM="|", QUOTECHAR='"'):
+def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
 
-    f = open(fn, "r")
-    csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
+    with open(file_name, "r") as f:
+        csv_reader = csv.reader(f, delimiter=delimiter, quotechar=quotechar)
 
-    if header:
-        headerLine = next(csvReader)
+        if header:
+            header_line = next(csv_reader)
 
-    data = []
-    for row in csvReader:
-        data.append(row)
-
-    f.close()
+        data = [row for row in csv_reader]
 
     if header:
-        return headerLine, data
-    else:
-        return data
+        return header_line, data
+    return data
 
 
 def meta_load_csv_file(fn, pk):
-    header, data = load_csv(fn, header=True, DELIM=",")
+    header, data = load_csv(fn, header=True, delimiter=",")
 
     if pk not in header:
         raise ValueError(
-            "Error: primary key (%s) not in header line of %s" % (pk, fn)
+            f"Error: primary key ({pk}) not in header line of {fn}"
         )
 
     # Find the index of the primary key column
-    pkIndex = header.index(pk)
+    pk_index = header.index(pk)
 
     # Make sure that our primary key column has all unique values
-    pkSet = set()
+    pk_set = set()
     for row in data:
-        if row[pkIndex] in pkSet:
+        if row[pk_index] in pk_set:
             raise ValueError(
-                "Error: primary key column is not unique in %s (duplicate value found: %s)"
-                % (fn, row[pkIndex])
+                f"Error: primary key column is not unique in {fn} "
+                f"(duplicate value found: {row[pk_index]})"
             )
         else:
-            pkSet.add(row[pkIndex])
+            pk_set.add(row[pk_index])
 
-    return header, data, pkIndex
+    return header, data, pk_index
 
 
-def doArgs(argList, name):
+def do_args(argList, name):
     parser = argparse.ArgumentParser(description=name)
 
     parser.add_argument(
@@ -98,7 +93,7 @@ def doArgs(argList, name):
 
 def main():
 
-    args = doArgs(sys.argv[1:], "CSV join script")
+    args = do_args(sys.argv[1:], "CSV join script")
     startTime = float(time.time())
 
     # -------------------------------------------------------------------------
