@@ -15,7 +15,7 @@ from csv_rows_builder import CSVRowsBuilder
 from arguments import Arguments
 
 
-def configure_arguments(argList, name):
+def configure_arguments(arguments, name):
     parser = argparse.ArgumentParser(description=name)
 
     parser.add_argument(
@@ -51,7 +51,7 @@ def configure_arguments(argList, name):
         default="left",
     )
 
-    return parser.parse_args(argList)
+    return parser.parse_args(arguments)
 
 
 def main():
