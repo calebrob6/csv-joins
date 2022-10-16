@@ -32,7 +32,7 @@ def meta_load_csv_file(fn, pk):
 
     if pk not in header:
         raise ValueError(
-            "Error: primary key (%s) not in header line of %s" % (pk, fn)
+            f"Error: primary key ({pk}) not in header line of {fn}"
         )
 
     # Find the index of the primary key column
@@ -43,8 +43,8 @@ def meta_load_csv_file(fn, pk):
     for row in data:
         if row[pkIndex] in pkSet:
             raise ValueError(
-                "Error: primary key column is not unique in %s (duplicate value found: %s)"
-                % (fn, row[pkIndex])
+                f"Error: primary key column is not unique in {fn} "
+                f"(duplicate value found: {row[pkIndex]})"
             )
         else:
             pkSet.add(row[pkIndex])
