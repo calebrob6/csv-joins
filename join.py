@@ -13,6 +13,7 @@ from csv_rows import CSVRows
 from csv_handler import CSVHandler
 from csv_rows_builder import CSVRowsBuilder
 from arguments import Arguments
+from join_strategies import JoinFactory
 
 
 def configure_arguments(arguments, name):
@@ -90,77 +91,12 @@ def main():
     # -------------------------------------------------------------------------
 
     output_header = left_csv.header + right_csv.header
-    output_rows = []
 
+    factory = JoinFactory()
 
-    if arguments.join_strategy == "left":
+    strategy = factory.join_strategy(arguments.join_strategy)
 
-        # Iterate through each row in the left table, try to find the matching
-        # row in the right table if the matching row doesn't exist, then fill
-        # with 'null's, if it does, then copy it over
-        for leftRow in left_csv.body:
-            leftRowPK = leftRow[left_csv.primary_key_index]
-            rightRow = None
-            if leftRowPK in right_csv.map_primary_key:
-                rightRow = right_csv.body[right_csv.map_primary_key[leftRowPK]]
-            else:
-                rightRow = ["null"] * len(right_csv.header)
-
-            # csvWriter.writerow(leftRow + rightRow)
-            output_rows.append(leftRow + rightRow)
-    elif arguments.join_strategy == "right":
-
-        # Similar to 'left' case
-        for rightRow in right_csv.body:
-            rightRowPK = rightRow[right_csv.primary_key_index]
-            leftRow = None
-            if rightRowPK in left_csv.map_primary_key:
-                leftRow = left_csv.body[left_csv.map_primary_key[rightRowPK]]
-            else:
-                leftRow = ["null"] * len(left_csv.header)
-
-            # csvWriter.writerow(leftRow + rightRow)
-            output_rows.append(leftRow + rightRow)
-    elif arguments.join_strategy == "inner":
-        # This join will only write rows for primary keys in the intersection
-        # of the two primary key sets
-        leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_csv.map_primary_key.keys())
-
-        newKeys = leftKeySet & rightKeySet
-
-        for keyVal in newKeys:
-            leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
-            rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
-
-            # csvWriter.writerow(leftRow + rightRow)
-            output_rows.append(leftRow + rightRow)
-    elif arguments.join_strategy == "full":
-        # This join will only write rows for primary keys in the union of the
-        # two primary key sets
-        leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_csv.map_primary_key.keys())
-
-        newKeys = leftKeySet | rightKeySet
-
-        for keyVal in newKeys:
-            leftRow = None
-            if keyVal in left_csv.map_primary_key:
-                leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
-            else:
-                leftRow = ["null"] * len(left_csv.header)
-
-            rightRow = None
-            if keyVal in right_csv.map_primary_key:
-                rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
-            else:
-                rightRow = ["null"] * len(right_csv.header)
-
-            # csvWriter.writerow(leftRow + rightRow)
-            output_rows.append(leftRow + rightRow)
-    else:
-        raise Exception("This shouldn't happen")
-
+    output_rows = strategy.join(left_csv, right_csv)
 
     output_csv = CSVRows(
         output_header,
