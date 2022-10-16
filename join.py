@@ -123,7 +123,6 @@ def do_args(argList, name):
 def main():
 
     args = do_args(sys.argv[1:], "CSV join script")
-    start_time = float(time.time())
 
     # -------------------------------------------------------------------------
     # Load the left data file
@@ -237,8 +236,6 @@ def main():
         raise Exception("This shouldn't happen")
 
     f.close()
-
-    print(f"Finished in {(time.time() - start_time):.4f} seconds")
 
 
 if __name__ == "__main__":
