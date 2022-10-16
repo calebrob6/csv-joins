@@ -171,7 +171,10 @@ def main():
 
     builder = CSVRowsBuilder()
 
-    left_csv = builder.build_csv_rows(arguments.left_file_name, arguments.left_primary_key)
+    left_csv = builder.build_csv_rows(
+        arguments.left_file_name,
+        arguments.left_primary_key
+    )
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
@@ -183,7 +186,10 @@ def main():
     # Load the right data file
     # -------------------------------------------------------------------------
 
-    right_csv = builder.build_csv_rows(arguments.right_file_name, arguments.right_primary_key)
+    right_csv = builder.build_csv_rows(
+        arguments.right_file_name,
+        arguments.right_primary_key
+    )
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
