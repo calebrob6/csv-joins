@@ -197,11 +197,9 @@ def main():
     # Write output file
     # -------------------------------------------------------------------------
 
-    f = open(arguments.output_file_name, "w")
-    csvWriter = csv.writer(
-        f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-    )
-    csvWriter.writerow(left_csv.header + right_csv.header)
+    output_header = left_csv.header + right_csv.header
+    output_rows = []
+
 
     if arguments.join_type == "left":
 
@@ -216,7 +214,8 @@ def main():
             else:
                 rightRow = ["null"] * len(right_csv.header)
 
-            csvWriter.writerow(leftRow + rightRow)
+            # csvWriter.writerow(leftRow + rightRow)
+            output_rows.append(leftRow + rightRow)
     elif arguments.join_type == "right":
 
         # Similar to 'left' case
@@ -228,7 +227,8 @@ def main():
             else:
                 leftRow = ["null"] * len(left_csv.header)
 
-            csvWriter.writerow(leftRow + rightRow)
+            # csvWriter.writerow(leftRow + rightRow)
+            output_rows.append(leftRow + rightRow)
     elif arguments.join_type == "inner":
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
@@ -241,7 +241,8 @@ def main():
             leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
             rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
 
-            csvWriter.writerow(leftRow + rightRow)
+            # csvWriter.writerow(leftRow + rightRow)
+            output_rows.append(leftRow + rightRow)
     elif arguments.join_type == "full":
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
@@ -263,11 +264,20 @@ def main():
             else:
                 rightRow = ["null"] * len(right_csv.header)
 
-            csvWriter.writerow(leftRow + rightRow)
+            # csvWriter.writerow(leftRow + rightRow)
+            output_rows.append(leftRow + rightRow)
     else:
         raise Exception("This shouldn't happen")
 
-    f.close()
+    with open(arguments.output_file_name, "w") as fp:
+        csvWriter = csv.writer(
+            fp, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+        )
+        csvWriter.writerow(output_header)
+
+        for row in output_rows:
+            csvWriter.writerow(row)
+
 
 
 if __name__ == "__main__":
