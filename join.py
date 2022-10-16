@@ -12,7 +12,7 @@ import csv
 import argparse
 
 
-def loadCSV(fn, header=False, DELIM="|", QUOTECHAR='"'):
+def load_csv(fn, header=False, DELIM="|", QUOTECHAR='"'):
 
     f = open(fn, "r")
     csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
@@ -32,8 +32,8 @@ def loadCSV(fn, header=False, DELIM="|", QUOTECHAR='"'):
         return data
 
 
-def metaLoadCSVFile(fn, pk):
-    header, data = loadCSV(fn, header=True, DELIM=",")
+def meta_load_csv_file(fn, pk):
+    header, data = load_csv(fn, header=True, DELIM=",")
 
     if pk not in header:
         raise ValueError(
@@ -107,7 +107,7 @@ def main():
     leftFn = args.leftFn
     leftPK = args.leftPK
 
-    leftHeader, leftData, leftKeyIndex = metaLoadCSVFile(leftFn, leftPK)
+    leftHeader, leftData, leftKeyIndex = meta_load_csv_file(leftFn, leftPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
@@ -121,7 +121,7 @@ def main():
     rightFn = args.rightFn
     rightPK = args.rightPK
 
-    rightHeader, rightData, rightKeyIndex = metaLoadCSVFile(rightFn, rightPK)
+    rightHeader, rightData, rightKeyIndex = meta_load_csv_file(rightFn, rightPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
