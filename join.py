@@ -50,10 +50,7 @@ def load_csv(file_name):
 def meta_load_csv_file(fn, pk):
     csv_rows = CSVRows(load_csv(fn), pk, fn)
 
-    if pk not in csv_rows.header:
-        raise ValueError(
-            f"Error: primary key ({pk}) not in header line of {fn}"
-        )
+    csv_rows.check_if_header_has_primary_key_column()
 
     # Make sure that our primary key column has all unique values
     pk_set = set()
