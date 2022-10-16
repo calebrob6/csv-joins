@@ -60,20 +60,30 @@ class CSVRows:
     def __header_has_primary_key_column(self):
         return self.primary_key not in self.header
 
-def rows_from_csv(file_name):
+class CSVRowsBuilder:
 
-    with open(file_name, "r") as f:
-        csv_reader = csv.reader(f)
-        return [row for row in csv_reader]
+    def build_csv_rows(self, file_name, primary_key):
+        rows = self.__rows_from_csv(file_name)
+        csv_rows = self.__csv_rows_instance(rows, primary_key, file_name)
+        self.__validators(csv_rows)
+        return csv_rows
+
+    def __rows_from_csv(self, file_name):
+        with open(file_name, "r") as f:
+            csv_reader = csv.reader(f)
+            return [row for row in csv_reader]
+
+    def __csv_rows_instance(self, rows, primary_key, file_name):
+        return CSVRows(rows, primary_key, file_name)
+
+    def __validators(self, csv_rows):
+        csv_rows.check_if_header_has_primary_key_column()
+        csv_rows.check_if_all_values_in_primary_key_column_are_unique()
 
 
 def meta_load_csv_file(file_name, primary_key):
-    rows = rows_from_csv(file_name)
-    csv_rows = CSVRows(rows, primary_key, file_name)
-
-    csv_rows.check_if_header_has_primary_key_column()
-    csv_rows.check_if_all_values_in_primary_key_column_are_unique()
-
+    builder = CSVRowsBuilder()
+    csv_rows = builder.build_csv_rows(file_name, primary_key)
     return csv_rows.header, csv_rows.body, csv_rows.primary_key_index
 
 
