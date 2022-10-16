@@ -15,7 +15,7 @@ from csv_rows_builder import CSVRowsBuilder
 from arguments import Arguments
 
 
-def do_args(argList, name):
+def configure_arguments(argList, name):
     parser = argparse.ArgumentParser(description=name)
 
     parser.add_argument(
@@ -56,7 +56,7 @@ def do_args(argList, name):
 
 def main():
 
-    args = do_args(sys.argv[1:], "CSV join script")
+    args = configure_arguments(sys.argv[1:], "CSV join script")
 
     arguments = Arguments(args)
     # -------------------------------------------------------------------------
