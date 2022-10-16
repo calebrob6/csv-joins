@@ -51,9 +51,11 @@ class CSVRows:
         for row in self.body:
             if row[self.primary_key_index] in pk_set:
                 raise ValueError(
-                    f"Error: primary key column is not unique in {self.file_name} (duplicate value found: {row[self.primary_key_index]})"
+                    f"Error: primary key column is not unique in "
+                    f"{self.file_name} (duplicate value found: "
+                    f"{row[self.primary_key_index]})"
                 )
-                pk_set.add(row[self.primary_key_index])
+            pk_set.add(row[self.primary_key_index])
 
     def __header_has_primary_key_column(self):
         return self.primary_key not in self.header
