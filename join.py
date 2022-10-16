@@ -17,8 +17,7 @@ def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
     with open(file_name, "r") as f:
         csv_reader = csv.reader(f, delimiter=delimiter, quotechar=quotechar)
 
-        if header:
-            header_line = next(csv_reader)
+        header_line = next(csv_reader) if header else []
 
         data = [row for row in csv_reader]
 
