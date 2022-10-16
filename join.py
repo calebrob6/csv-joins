@@ -48,7 +48,7 @@ def load_csv(file_name):
 
 
 def meta_load_csv_file(fn, pk):
-    csv_rows = CSVRows(load_csv(fn), pk)
+    csv_rows = CSVRows(load_csv(fn), pk, fn)
 
     if pk not in csv_rows.header:
         raise ValueError(
