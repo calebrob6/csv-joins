@@ -101,35 +101,37 @@ def main():
     args = doArgs(sys.argv[1:], "CSV join script")
     startTime = float(time.time())
 
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Load the left data file
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     leftFn = args.leftFn
     leftPK = args.leftPK
 
     leftHeader, leftData, leftKeyIndex = metaLoadCSVFile(leftFn, leftPK)
 
-    # Map the primary keys to their row index so we can look up keys from the other table in constant time
+    # Map the primary keys to their row index so we can look up keys from the
+    # other table in constant time
     leftPKMap = {}
     for i, row in enumerate(leftData):
         leftPKMap[row[leftKeyIndex]] = i
 
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Load the right data file
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     rightFn = args.rightFn
     rightPK = args.rightPK
 
     rightHeader, rightData, rightKeyIndex = metaLoadCSVFile(rightFn, rightPK)
 
-    # Map the primary keys to their row index so we can look up keys from the other table in constant time
+    # Map the primary keys to their row index so we can look up keys from the
+    # other table in constant time
     rightPKMap = {}
     for i, row in enumerate(rightData):
         rightPKMap[row[rightKeyIndex]] = i
 
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Write output file
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     outputFn = args.outputFn
     joinType = args.joinType
 
@@ -139,11 +141,12 @@ def main():
     )
     csvWriter.writerow(leftHeader + rightHeader)
 
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     if joinType == "left":
 
-        # Iterate through each row in the left table, try to find the matching row in the right table
-        # if the matching row doesn't exist, then fill with 'null's, if it does, then copy it over
+        # Iterate through each row in the left table, try to find the matching
+        # row in the right table if the matching row doesn't exist, then fill
+        # with 'null's, if it does, then copy it over
         for leftRow in leftData:
             leftRowPK = leftRow[leftKeyIndex]
             rightRow = None
@@ -153,7 +156,7 @@ def main():
                 rightRow = ["null"] * len(rightHeader)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     elif joinType == "right":
 
         # Similar to 'left' case
@@ -166,9 +169,10 @@ def main():
                 leftRow = ["null"] * len(leftHeader)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     elif joinType == "inner":
-        # This join will only write rows for primary keys in the intersection of the two primary key sets
+        # This join will only write rows for primary keys in the intersection
+        # of the two primary key sets
         leftKeySet = set(leftPKMap.keys())
         rightKeySet = set(rightPKMap.keys())
 
@@ -179,9 +183,10 @@ def main():
             rightRow = rightData[rightPKMap[keyVal]]
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     elif joinType == "full":
-        # This join will only write rows for primary keys in the union of the two primary key sets
+        # This join will only write rows for primary keys in the union of the
+        # two primary key sets
         leftKeySet = set(leftPKMap.keys())
         rightKeySet = set(rightPKMap.keys())
 
@@ -201,7 +206,7 @@ def main():
                 rightRow = ["null"] * len(rightHeader)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     else:
         raise Exception("This shouldn't happen")
 
