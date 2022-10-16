@@ -12,32 +12,41 @@ import csv
 import argparse
 
 
-def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
+class CSVRows:
+
+    def __init__(self, rows):
+        self.__header, *self.__body = rows
+
+    @property
+    def header(self):
+        return self.__header
+
+    @property
+    def body(self):
+        return self.__body
+
+
+def load_csv(file_name):
 
     with open(file_name, "r") as f:
-        csv_reader = csv.reader(f, delimiter=delimiter, quotechar=quotechar)
-
-        header_line = next(csv_reader) if header else []
-
-        data = [row for row in csv_reader]
-
-    return header_line, data
+        csv_reader = csv.reader(f)
+        return [row for row in csv_reader]
 
 
 def meta_load_csv_file(fn, pk):
-    header, data = load_csv(fn, header=True, delimiter=",")
+    csv_rows = CSVRows(load_csv(fn))
 
-    if pk not in header:
+    if pk not in csv_rows.header:
         raise ValueError(
             f"Error: primary key ({pk}) not in header line of {fn}"
         )
 
     # Find the index of the primary key column
-    pk_index = header.index(pk)
+    pk_index = csv_rows.header.index(pk)
 
     # Make sure that our primary key column has all unique values
     pk_set = set()
-    for row in data:
+    for row in csv_rows.body:
         if row[pk_index] in pk_set:
             raise ValueError(
                 f"Error: primary key column is not unique in {fn} "
@@ -46,7 +55,7 @@ def meta_load_csv_file(fn, pk):
         else:
             pk_set.add(row[pk_index])
 
-    return header, data, pk_index
+    return csv_rows.header, csv_rows.body, pk_index
 
 
 def do_args(argList, name):
