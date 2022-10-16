@@ -28,17 +28,36 @@ class CSVRows:
         return self.__body
 
     @property
+    def primary_key(self):
+        return self.__primary_key
+
+    @property
+    def file_name(self):
+        return self.__file_name
+
+    @property
     def primary_key_index(self):
-        return self.__header.index(self.__primary_key)
+        return self.header.index(self.primary_key)
 
     def check_if_header_has_primary_key_column(self):
-        if self.__header_has_primary_key_column:
+        if self.__header_has_primary_key_column():
             raise ValueError(
-                f"Error: primary key ({self.__primary_key}) not in header line of {self.__file_name}"
+                f"Error: primary key ({self.primary_key}) not in header "
+                f"line of {self.file_name}"
             )
 
+    def check_if_all_values_in_primary_key_column_are_unique(self):
+        pk_set = set()
+        for row in self.body:
+            if row[self.primary_key_index] in pk_set:
+                raise ValueError(
+                    f"Error: primary key column is not unique in {self.file_name} (duplicate value found: {row[self.primary_key_index]})"
+                )
+            else:
+                pk_set.add(row[self.primary_key_index])
+
     def __header_has_primary_key_column(self):
-        return self.__primary_key not in self.__header
+        return self.primary_key not in self.header
 
 def load_csv(file_name):
 
@@ -51,17 +70,7 @@ def meta_load_csv_file(fn, pk):
     csv_rows = CSVRows(load_csv(fn), pk, fn)
 
     csv_rows.check_if_header_has_primary_key_column()
-
-    # Make sure that our primary key column has all unique values
-    pk_set = set()
-    for row in csv_rows.body:
-        if row[csv_rows.primary_key_index] in pk_set:
-            raise ValueError(
-                f"Error: primary key column is not unique in {fn} "
-                f"(duplicate value found: {row[csv_rows.primary_key_index]})"
-            )
-        else:
-            pk_set.add(row[csv_rows.primary_key_index])
+    csv_rows.check_if_all_values_in_primary_key_column_are_unique()
 
     return csv_rows.header, csv_rows.body, csv_rows.primary_key_index
 
