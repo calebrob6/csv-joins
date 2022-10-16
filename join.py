@@ -31,6 +31,11 @@ class CSVRows:
     def primary_key_index(self):
         return self.__header.index(self.__primary_key)
 
+    def check_if_header_has_primary_key_column(self):
+        if self.__header_has_primary_key_column:
+            raise ValueError(
+                f"Error: primary key ({self.__primary_key}) not in header line of {self.__file_name}"
+            )
 
     def __header_has_primary_key_column(self):
         return self.__primary_key not in self.__header
