@@ -14,8 +14,9 @@ import argparse
 
 class CSVRows:
 
-    def __init__(self, rows):
+    def __init__(self, rows, primary_key):
         self.__header, *self.__body = rows
+        self.__primary_key = primary_key
 
     @property
     def header(self):
@@ -24,6 +25,10 @@ class CSVRows:
     @property
     def body(self):
         return self.__body
+
+    @property
+    def primary_key_index(self):
+        return self.__header.index(self.__primary_key)
 
 
 def load_csv(file_name):
@@ -34,28 +39,25 @@ def load_csv(file_name):
 
 
 def meta_load_csv_file(fn, pk):
-    csv_rows = CSVRows(load_csv(fn))
+    csv_rows = CSVRows(load_csv(fn), pk)
 
     if pk not in csv_rows.header:
         raise ValueError(
             f"Error: primary key ({pk}) not in header line of {fn}"
         )
 
-    # Find the index of the primary key column
-    pk_index = csv_rows.header.index(pk)
-
     # Make sure that our primary key column has all unique values
     pk_set = set()
     for row in csv_rows.body:
-        if row[pk_index] in pk_set:
+        if row[csv_rows.primary_key_index] in pk_set:
             raise ValueError(
                 f"Error: primary key column is not unique in {fn} "
-                f"(duplicate value found: {row[pk_index]})"
+                f"(duplicate value found: {row[csv_rows.primary_key_index]})"
             )
         else:
-            pk_set.add(row[pk_index])
+            pk_set.add(row[csv_rows.primary_key_index])
 
-    return csv_rows.header, csv_rows.body, pk_index
+    return csv_rows.header, csv_rows.body, csv_rows.primary_key_index
 
 
 def do_args(argList, name):
