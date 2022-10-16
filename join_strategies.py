@@ -2,6 +2,8 @@ import abc
 
 
 class BaseJoin(abc.ABC):
+    """An interface for all join strategies."""
+
     @abc.abstractmethod
     def join(self, left_csv, right_csv):
         pass
@@ -15,15 +17,17 @@ class LeftJoin(BaseJoin):
 
     def join(self, left_csv, right_csv):
         output_rows = []
-        for leftRow in left_csv.body:
-            leftRowPK = leftRow[left_csv.primary_key_index]
-            rightRow = None
-            if leftRowPK in right_csv.map_primary_key:
-                rightRow = right_csv.body[right_csv.map_primary_key[leftRowPK]]
+        for left_row in left_csv.body:
+            left_row_pk = left_row[left_csv.primary_key_index]
+            right_row = None
+            if left_row_pk in right_csv.map_primary_key:
+                right_row = right_csv.body[
+                    right_csv.map_primary_key[left_row_pk]
+                ]
             else:
-                rightRow = ["null"] * len(right_csv.header)
+                right_row = ["null"] * len(right_csv.header)
 
-            output_rows.append(leftRow + rightRow)
+            output_rows.append(left_row + right_row)
         return output_rows
 
 
@@ -32,15 +36,15 @@ class RightJoin(BaseJoin):
 
     def join(self, left_csv, right_csv):
         output_rows = []
-        for rightRow in right_csv.body:
-            rightRowPK = rightRow[right_csv.primary_key_index]
-            leftRow = None
-            if rightRowPK in left_csv.map_primary_key:
-                leftRow = left_csv.body[left_csv.map_primary_key[rightRowPK]]
+        for right_row in right_csv.body:
+            right_row_pk = right_row[right_csv.primary_key_index]
+            left_row = None
+            if right_row_pk in left_csv.map_primary_key:
+                left_row = left_csv.body[left_csv.map_primary_key[right_row_pk]]
             else:
-                leftRow = ["null"] * len(left_csv.header)
+                left_row = ["null"] * len(left_csv.header)
 
-            output_rows.append(leftRow + rightRow)
+            output_rows.append(left_row + right_row)
         return output_rows
 
 
@@ -50,17 +54,17 @@ class InnerJoin(BaseJoin):
     """
 
     def join(self, left_csv, right_csv):
-        leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_csv.map_primary_key.keys())
+        left_key_set = set(left_csv.map_primary_key.keys())
+        right_key_set = set(right_csv.map_primary_key.keys())
 
-        newKeys = leftKeySet & rightKeySet
+        new_keys = left_key_set & right_key_set
 
         output_rows = []
-        for keyVal in newKeys:
-            leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
-            rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
+        for key_val in new_keys:
+            left_row = left_csv.body[left_csv.map_primary_key[key_val]]
+            right_row = right_csv.body[right_csv.map_primary_key[key_val]]
 
-            output_rows.append(leftRow + rightRow)
+            output_rows.append(left_row + right_row)
         return output_rows
 
 
@@ -70,27 +74,26 @@ class FullJoin(BaseJoin):
     """
 
     def join(self, left_csv, right_csv):
-        
-        leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_csv.map_primary_key.keys())
+        left_key_set = set(left_csv.map_primary_key.keys())
+        right_key_set = set(right_csv.map_primary_key.keys())
 
-        newKeys = leftKeySet | rightKeySet
+        new_keys = left_key_set | right_key_set
 
         output_rows = []
-        for keyVal in newKeys:
-            leftRow = None
-            if keyVal in left_csv.map_primary_key:
-                leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
+        for key_val in new_keys:
+            left_row = None
+            if key_val in left_csv.map_primary_key:
+                left_row = left_csv.body[left_csv.map_primary_key[key_val]]
             else:
-                leftRow = ["null"] * len(left_csv.header)
+                left_row = ["null"] * len(left_csv.header)
 
-            rightRow = None
-            if keyVal in right_csv.map_primary_key:
-                rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
+            right_row = None
+            if key_val in right_csv.map_primary_key:
+                right_row = right_csv.body[right_csv.map_primary_key[key_val]]
             else:
-                rightRow = ["null"] * len(right_csv.header)
+                right_row = ["null"] * len(right_csv.header)
 
-            output_rows.append(leftRow + rightRow)
+            output_rows.append(left_row + right_row)
 
         return output_rows
 
