@@ -203,7 +203,6 @@ def main():
     )
     csvWriter.writerow(left_csv.header + right_csv.header)
 
-    # -------------------------------------------------------------------------
     if arguments.join_type == "left":
 
         # Iterate through each row in the left table, try to find the matching
@@ -218,7 +217,6 @@ def main():
                 rightRow = ["null"] * len(right_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------
     elif arguments.join_type == "right":
 
         # Similar to 'left' case
@@ -231,7 +229,6 @@ def main():
                 leftRow = ["null"] * len(left_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------
     elif arguments.join_type == "inner":
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
@@ -245,7 +242,6 @@ def main():
             rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------
     elif arguments.join_type == "full":
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
@@ -268,7 +264,6 @@ def main():
                 rightRow = ["null"] * len(right_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
-    # -------------------------------------------------------------------------
     else:
         raise Exception("This shouldn't happen")
 
