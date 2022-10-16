@@ -8,6 +8,11 @@ class BaseJoin(abc.ABC):
 
 
 class LeftJoin(BaseJoin):
+    """Iterate through each row in the left table, try to find the matching row
+    in the right table if the matching row doesn't exist, then fill with
+    'null's, if it does, then copy it over.
+    """
+
     def join(self, left_csv, right_csv):
         output_rows = []
         for leftRow in left_csv.body:
@@ -23,6 +28,8 @@ class LeftJoin(BaseJoin):
 
 
 class RightJoin(BaseJoin):
+    """Similar to 'left' case."""
+
     def join(self, left_csv, right_csv):
         output_rows = []
         for rightRow in right_csv.body:
@@ -38,6 +45,10 @@ class RightJoin(BaseJoin):
 
 
 class InnerJoin(BaseJoin):
+    """This join will only write rows for primary keys in the intersection of
+    the two primary key sets.
+    """
+
     def join(self, left_csv, right_csv):
         leftKeySet = set(left_csv.map_primary_key.keys())
         rightKeySet = set(right_csv.map_primary_key.keys())
@@ -54,6 +65,10 @@ class InnerJoin(BaseJoin):
 
 
 class FullJoin(BaseJoin):
+    """This join will only write rows for primary keys in the union of the two
+    primary key sets.
+    """
+
     def join(self, left_csv, right_csv):
         
         leftKeySet = set(left_csv.map_primary_key.keys())
