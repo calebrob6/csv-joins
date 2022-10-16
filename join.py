@@ -274,13 +274,19 @@ def main():
     else:
         raise Exception("This shouldn't happen")
 
-    with open(arguments.output_file_name, "w") as fp:
-        csvWriter = csv.writer(
-            fp, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-        )
-        csvWriter.writerow(output_header)
 
-        for row in output_rows:
+    output_csv = CSVRows(
+        output_header,
+        output_rows,
+        'a',
+        arguments.output_file_name
+    )
+
+    with open(output_csv.file_name, "w") as fp:
+        csvWriter = csv.writer(fp)
+        csvWriter.writerow(output_csv.header)
+
+        for row in output_csv.body:
             csvWriter.writerow(row)
 
 
