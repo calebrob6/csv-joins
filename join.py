@@ -51,7 +51,7 @@ def configure_arguments(arguments, name):
         "--type",
         type=str,
         action="store",
-        dest="join_type",
+        dest="join_strategy",
         choices=["left", "right", "inner", "full"],
         help="Type of join (default is 'left join')",
         default="left",
@@ -93,7 +93,7 @@ def main():
     output_rows = []
 
 
-    if arguments.join_type == "left":
+    if arguments.join_strategy == "left":
 
         # Iterate through each row in the left table, try to find the matching
         # row in the right table if the matching row doesn't exist, then fill
@@ -108,7 +108,7 @@ def main():
 
             # csvWriter.writerow(leftRow + rightRow)
             output_rows.append(leftRow + rightRow)
-    elif arguments.join_type == "right":
+    elif arguments.join_strategy == "right":
 
         # Similar to 'left' case
         for rightRow in right_csv.body:
@@ -121,7 +121,7 @@ def main():
 
             # csvWriter.writerow(leftRow + rightRow)
             output_rows.append(leftRow + rightRow)
-    elif arguments.join_type == "inner":
+    elif arguments.join_strategy == "inner":
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
         leftKeySet = set(left_csv.map_primary_key.keys())
@@ -135,7 +135,7 @@ def main():
 
             # csvWriter.writerow(leftRow + rightRow)
             output_rows.append(leftRow + rightRow)
-    elif arguments.join_type == "full":
+    elif arguments.join_strategy == "full":
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
         leftKeySet = set(left_csv.map_primary_key.keys())
