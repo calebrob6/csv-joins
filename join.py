@@ -14,8 +14,9 @@ import argparse
 
 class CSVRows:
 
-    def __init__(self, rows, primary_key, file_name):
-        self.__header, *self.__body = rows
+    def __init__(self, header, rows, primary_key, file_name):
+        self.__header = header
+        self.__body = rows
         self.__primary_key = primary_key
         self.__file_name = file_name
         self.__map_primary_key = self.__create_map_primary_key()
@@ -71,8 +72,13 @@ class CSVRows:
 class CSVRowsBuilder:
 
     def build_csv_rows(self, file_name, primary_key):
-        rows = self.__rows_from_csv(file_name)
-        csv_rows = self.__csv_rows_instance(rows, primary_key, file_name)
+        headers, *rows = self.__rows_from_csv(file_name)
+        csv_rows = self.__csv_rows_instance(
+            headers,
+            rows,
+            primary_key,
+            file_name
+        )
         self.__validators(csv_rows)
         return csv_rows
 
@@ -81,8 +87,8 @@ class CSVRowsBuilder:
             csv_reader = csv.reader(f)
             return [row for row in csv_reader]
 
-    def __csv_rows_instance(self, rows, primary_key, file_name):
-        return CSVRows(rows, primary_key, file_name)
+    def __csv_rows_instance(self, headers, rows, primary_key, file_name):
+        return CSVRows(headers, rows, primary_key, file_name)
 
     def __validators(self, csv_rows):
         csv_rows.check_if_header_has_primary_key_column()
