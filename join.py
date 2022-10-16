@@ -81,12 +81,6 @@ class CSVRowsBuilder:
         csv_rows.check_if_all_values_in_primary_key_column_are_unique()
 
 
-def meta_load_csv_file(file_name, primary_key):
-    builder = CSVRowsBuilder()
-    csv_rows = builder.build_csv_rows(file_name, primary_key)
-    return csv_rows.header, csv_rows.body, csv_rows.primary_key_index
-
-
 def do_args(argList, name):
     parser = argparse.ArgumentParser(description=name)
 
@@ -140,7 +134,6 @@ def main():
     builder = CSVRowsBuilder()
 
     left_csv = builder.build_csv_rows(leftFn, leftPK)
-    # leftHeader, leftData, leftKeyIndex = meta_load_csv_file(leftFn, leftPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
@@ -155,7 +148,6 @@ def main():
     rightPK = args.rightPK
 
     right_csv = builder.build_csv_rows(rightFn, rightPK)
-    # rightHeader, rightData, rightKeyIndex = meta_load_csv_file(rightFn, rightPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
