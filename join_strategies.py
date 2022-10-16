@@ -96,9 +96,15 @@ class FullJoin(BaseJoin):
 
 
 class JoinFactory:
-
-    def join_strategy(self):
-        
-
-
-
+    def join_strategy(self, strategy):
+        match strategy:
+            case "left":
+                return LeftJoin()
+            case "right":
+                return RightJoin()
+            case "inner":
+                return InnerJoin()
+            case "full":
+                return FullJoin()
+            case _:
+                raise Exception("This shouldn't happen")
