@@ -68,10 +68,29 @@ class CSVRows:
     def __header_has_primary_key_column(self):
         return self.primary_key not in self.header
 
+
+class CSVHandler:
+
+    def load_rows_from_csv(self, file_name):
+        with open(file_name, "r") as f:
+            csv_reader = csv.reader(f)
+            return [row for row in csv_reader]
+
+    def save_in_csv(self, output_csv):
+        with open(output_csv.file_name, "w") as fp:
+            csvWriter = csv.writer(fp)
+            csvWriter.writerow(output_csv.header)
+
+            for row in output_csv.body:
+                csvWriter.writerow(row)
+
+
 class CSVRowsBuilder:
+    def __init__(self):
+        self.__csv_handler = CSVHandler()
 
     def build_csv_rows(self, file_name, primary_key):
-        headers, *rows = self.__rows_from_csv(file_name)
+        headers, *rows = self.__csv_handler.load_rows_from_csv(file_name)
         csv_rows = self.__csv_rows_instance(
             headers,
             rows,
@@ -80,11 +99,6 @@ class CSVRowsBuilder:
         )
         self.__validators(csv_rows)
         return csv_rows
-
-    def __rows_from_csv(self, file_name):
-        with open(file_name, "r") as f:
-            csv_reader = csv.reader(f)
-            return [row for row in csv_reader]
 
     def __csv_rows_instance(self, headers, rows, primary_key, file_name):
         return CSVRows(headers, rows, primary_key, file_name)
@@ -282,14 +296,9 @@ def main():
         arguments.output_file_name
     )
 
-    with open(output_csv.file_name, "w") as fp:
-        csvWriter = csv.writer(fp)
-        csvWriter.writerow(output_csv.header)
+    csv_handler = CSVHandler()
 
-        for row in output_csv.body:
-            csvWriter.writerow(row)
-
-
+    csv_handler.save_in_csv(output_csv)
 
 if __name__ == "__main__":
     main()
