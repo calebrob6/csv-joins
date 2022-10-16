@@ -24,8 +24,7 @@ def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
 
     if header:
         return header_line, data
-    else:
-        return data
+    return data
 
 
 def meta_load_csv_file(fn, pk):
