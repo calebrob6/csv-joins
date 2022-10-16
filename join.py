@@ -193,12 +193,6 @@ def main():
         arguments.right_primary_key
     )
 
-    # Map the primary keys to their row index so we can look up keys from the
-    # other table in constant time
-    right_primary_key_map = {}
-    for i, row in enumerate(right_csv.body):
-        right_primary_key_map[row[right_csv.primary_key_index]] = i
-
     # -------------------------------------------------------------------------
     # Write output file
     # -------------------------------------------------------------------------
@@ -218,8 +212,8 @@ def main():
         for leftRow in left_csv.body:
             leftRowPK = leftRow[left_csv.primary_key_index]
             rightRow = None
-            if leftRowPK in right_primary_key_map:
-                rightRow = right_csv.body[right_primary_key_map[leftRowPK]]
+            if leftRowPK in right_csv.map_primary_key:
+                rightRow = right_csv.body[right_csv.map_primary_key[leftRowPK]]
             else:
                 rightRow = ["null"] * len(right_csv.header)
 
@@ -242,13 +236,13 @@ def main():
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
         leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_primary_key_map.keys())
+        rightKeySet = set(right_csv.map_primary_key.keys())
 
         newKeys = leftKeySet & rightKeySet
 
         for keyVal in newKeys:
             leftRow = left_csv.body[left_csv.map_primary_key[keyVal]]
-            rightRow = right_csv.body[right_primary_key_map[keyVal]]
+            rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
@@ -256,7 +250,7 @@ def main():
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
         leftKeySet = set(left_csv.map_primary_key.keys())
-        rightKeySet = set(right_primary_key_map.keys())
+        rightKeySet = set(right_csv.map_primary_key.keys())
 
         newKeys = leftKeySet | rightKeySet
 
@@ -268,8 +262,8 @@ def main():
                 leftRow = ["null"] * len(left_csv.header)
 
             rightRow = None
-            if keyVal in right_primary_key_map:
-                rightRow = right_csv.body[right_primary_key_map[keyVal]]
+            if keyVal in right_csv.map_primary_key:
+                rightRow = right_csv.body[right_csv.map_primary_key[keyVal]]
             else:
                 rightRow = ["null"] * len(right_csv.header)
 
