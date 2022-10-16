@@ -60,7 +60,7 @@ class CSVRows:
     def __header_has_primary_key_column(self):
         return self.primary_key not in self.header
 
-def load_csv(file_name):
+def rows_from_csv(file_name):
 
     with open(file_name, "r") as f:
         csv_reader = csv.reader(f)
@@ -68,7 +68,8 @@ def load_csv(file_name):
 
 
 def meta_load_csv_file(file_name, primary_key):
-    csv_rows = CSVRows(load_csv(file_name), primary_key, file_name)
+    rows = rows_from_csv(file_name)
+    csv_rows = CSVRows(rows, primary_key, file_name)
 
     csv_rows.check_if_header_has_primary_key_column()
     csv_rows.check_if_all_values_in_primary_key_column_are_unique()
