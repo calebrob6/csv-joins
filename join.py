@@ -7,105 +7,12 @@
 # Distributed under terms of the MIT license.
 
 import sys
-import csv
 import argparse
 
-
-class CSVRows:
-
-    def __init__(self, header, rows, primary_key, file_name):
-        self.__header = header
-        self.__body = rows
-        self.__primary_key = primary_key
-        self.__file_name = file_name
-        self.__map_primary_key = self.__create_map_primary_key()
-
-    @property
-    def header(self):
-        return self.__header
-
-    @property
-    def body(self):
-        return self.__body
-
-    @property
-    def primary_key(self):
-        return self.__primary_key
-
-    @property
-    def primary_key_index(self):
-        return self.header.index(self.primary_key)
-
-    @property
-    def file_name(self):
-        return self.__file_name
-
-    @property
-    def map_primary_key(self):
-        return self.__map_primary_key
-
-    def check_if_header_has_primary_key_column(self):
-        if self.__header_has_primary_key_column():
-            raise ValueError(
-                f"Error: primary key ({self.primary_key}) not in header "
-                f"line of {self.file_name}"
-            )
-
-    def check_if_all_values_in_primary_key_column_are_unique(self):
-        pk_set = set()
-        for row in self.body:
-            if row[self.primary_key_index] in pk_set:
-                raise ValueError(
-                    f"Error: primary key column is not unique in "
-                    f"{self.file_name} (duplicate value found: "
-                    f"{row[self.primary_key_index]})"
-                )
-            pk_set.add(row[self.primary_key_index])
-
-    def __create_map_primary_key(self):
-        return {r[self.primary_key_index]: i for i, r in enumerate(self.body)}
-
-    def __header_has_primary_key_column(self):
-        return self.primary_key not in self.header
-
-
-class CSVHandler:
-
-    def load_rows_from_csv(self, file_name):
-        with open(file_name, "r") as f:
-            csv_reader = csv.reader(f)
-            return [row for row in csv_reader]
-
-    def save_in_csv(self, output_csv):
-        with open(output_csv.file_name, "w") as fp:
-            csvWriter = csv.writer(fp)
-            csvWriter.writerow(output_csv.header)
-
-            for row in output_csv.body:
-                csvWriter.writerow(row)
-
-
-class CSVRowsBuilder:
-    def __init__(self):
-        self.__csv_handler = CSVHandler()
-
-    def build_csv_rows(self, file_name, primary_key):
-        headers, *rows = self.__csv_handler.load_rows_from_csv(file_name)
-        csv_rows = self.__csv_rows_instance(
-            headers,
-            rows,
-            primary_key,
-            file_name
-        )
-        self.__validators(csv_rows)
-        return csv_rows
-
-    def __csv_rows_instance(self, headers, rows, primary_key, file_name):
-        return CSVRows(headers, rows, primary_key, file_name)
-
-    def __validators(self, csv_rows):
-        csv_rows.check_if_header_has_primary_key_column()
-        csv_rows.check_if_all_values_in_primary_key_column_are_unique()
+from csv_rows import CSVRows
+from csv_handler import CSVHandler
+from csv_rows_builder import CSVRowsBuilder
+from arguments import Arguments
 
 
 def do_args(argList, name):
@@ -145,46 +52,6 @@ def do_args(argList, name):
     )
 
     return parser.parse_args(argList)
-
-
-class Arguments:
-
-    def __init__(self, args):
-        self.__verbose = args.verbose
-        self.__left_file_name = args.leftFn
-        self.__left_primary_key = args.leftPK
-        self.__right_file_name = args.rightFn
-        self.__right_primary_key = args.rightPK
-        self.__output_file_name = args.outputFn
-        self.__join_type = args.joinType
-
-    @property
-    def verbose(self):
-        return self.__verbose
-
-    @property
-    def left_file_name(self):
-        return self.__left_file_name
-
-    @property
-    def left_primary_key(self):
-        return self.__left_primary_key
-
-    @property
-    def right_file_name(self):
-        return self.__right_file_name
-
-    @property
-    def right_primary_key(self):
-        return self.__right_primary_key
-
-    @property
-    def output_file_name(self):
-        return self.__output_file_name
-
-    @property
-    def join_type(self):
-        return self.__join_type
 
 
 def main():
