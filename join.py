@@ -7,7 +7,6 @@
 # Distributed under terms of the MIT license.
 
 import sys
-import time
 import csv
 import argparse
 
