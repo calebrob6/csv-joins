@@ -32,6 +32,9 @@ class CSVRows:
         return self.__header.index(self.__primary_key)
 
 
+    def __header_has_primary_key_column(self):
+        return self.__primary_key not in self.__header
+
 def load_csv(file_name):
 
     with open(file_name, "r") as f:
