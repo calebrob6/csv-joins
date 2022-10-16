@@ -53,7 +53,6 @@ class CSVRows:
                 raise ValueError(
                     f"Error: primary key column is not unique in {self.file_name} (duplicate value found: {row[self.primary_key_index]})"
                 )
-            else:
                 pk_set.add(row[self.primary_key_index])
 
     def __header_has_primary_key_column(self):
