@@ -158,17 +158,17 @@ def main():
     # -------------------------------------------------------------------------
     # Write output file
     # -------------------------------------------------------------------------
-    outputFn = args.outputFn
-    joinType = args.joinType
+    output_file_name = args.outputFn
+    join_type = args.joinType
 
-    f = open(outputFn, "w")
+    f = open(output_file_name, "w")
     csvWriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
     )
     csvWriter.writerow(left_csv.header + right_csv.header)
 
     # -------------------------------------------------------------------------
-    if joinType == "left":
+    if join_type == "left":
 
         # Iterate through each row in the left table, try to find the matching
         # row in the right table if the matching row doesn't exist, then fill
@@ -183,7 +183,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif joinType == "right":
+    elif join_type == "right":
 
         # Similar to 'left' case
         for rightRow in right_csv.body:
@@ -196,7 +196,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif joinType == "inner":
+    elif join_type == "inner":
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
         leftKeySet = set(left_primary_key_map.keys())
@@ -210,7 +210,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif joinType == "full":
+    elif join_type == "full":
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
         leftKeySet = set(left_primary_key_map.keys())
