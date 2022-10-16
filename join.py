@@ -14,17 +14,15 @@ import argparse
 
 def load_csv(fn, header=False, DELIM="|", QUOTECHAR='"'):
 
-    f = open(fn, "r")
-    csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
+    with open(fn, "r") as f:
+        csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
 
-    if header:
-        headerLine = next(csvReader)
+        if header:
+            headerLine = next(csvReader)
 
-    data = []
-    for row in csvReader:
-        data.append(row)
-
-    f.close()
+        data = []
+        for row in csvReader:
+            data.append(row)
 
     if header:
         return headerLine, data
