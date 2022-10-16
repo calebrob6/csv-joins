@@ -18,6 +18,7 @@ class CSVRows:
         self.__header, *self.__body = rows
         self.__primary_key = primary_key
         self.__file_name = file_name
+        self.__map_primary_key = self.__create_map_primary_key()
 
     @property
     def header(self):
@@ -32,12 +33,16 @@ class CSVRows:
         return self.__primary_key
 
     @property
+    def primary_key_index(self):
+        return self.header.index(self.primary_key)
+
+    @property
     def file_name(self):
         return self.__file_name
 
     @property
-    def primary_key_index(self):
-        return self.header.index(self.primary_key)
+    def map_primary_key(self):
+        return self.__map_primary_key
 
     def check_if_header_has_primary_key_column(self):
         if self.__header_has_primary_key_column():
@@ -56,6 +61,9 @@ class CSVRows:
                     f"{row[self.primary_key_index]})"
                 )
             pk_set.add(row[self.primary_key_index])
+
+    def __create_map_primary_key(self):
+        return {r[self.primary_key_index]: i for i, r in enumerate(self.body)}
 
     def __header_has_primary_key_column(self):
         return self.primary_key not in self.header
