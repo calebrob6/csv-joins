@@ -20,9 +20,7 @@ def load_csv(fn, header=False, DELIM="|", QUOTECHAR='"'):
         if header:
             headerLine = next(csvReader)
 
-        data = []
-        for row in csvReader:
-            data.append(row)
+        data = [row for row in csvReader]
 
     if header:
         return headerLine, data
