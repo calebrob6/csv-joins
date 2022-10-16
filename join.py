@@ -120,19 +120,58 @@ def do_args(argList, name):
     return parser.parse_args(argList)
 
 
+class Arguments:
+
+    def __init__(self, args):
+        self.__verbose = args.verbose
+        self.__left_file_name = args.leftFn
+        self.__left_primary_key = args.leftPK
+        self.__right_file_name = args.rightFn
+        self.__right_primary_key = args.rightPK
+        self.__output_file_name = args.outputFn
+        self.__join_type = args.joinType
+
+    @property
+    def verbose(self):
+        return self.__verbose
+
+    @property
+    def left_file_name(self):
+        return self.__left_file_name
+
+    @property
+    def left_primary_key(self):
+        return self.__left_primary_key
+
+    @property
+    def right_file_name(self):
+        return self.__right_file_name
+
+    @property
+    def right_primary_key(self):
+        return self.__right_primary_key
+
+    @property
+    def output_file_name(self):
+        return self.__output_file_name
+
+    @property
+    def join_type(self):
+        return self.__join_type
+
+
 def main():
 
     args = do_args(sys.argv[1:], "CSV join script")
 
+    arguments = Arguments(args)
     # -------------------------------------------------------------------------
     # Load the left data file
     # -------------------------------------------------------------------------
-    left_file_name = args.leftFn
-    left_primary_key = args.leftPK
 
     builder = CSVRowsBuilder()
 
-    left_csv = builder.build_csv_rows(left_file_name, left_primary_key)
+    left_csv = builder.build_csv_rows(arguments.left_file_name, arguments.left_primary_key)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
@@ -143,10 +182,8 @@ def main():
     # -------------------------------------------------------------------------
     # Load the right data file
     # -------------------------------------------------------------------------
-    right_file_name = args.rightFn
-    right_primary_key = args.rightPK
 
-    right_csv = builder.build_csv_rows(right_file_name, right_primary_key)
+    right_csv = builder.build_csv_rows(arguments.right_file_name, arguments.right_primary_key)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
@@ -157,17 +194,15 @@ def main():
     # -------------------------------------------------------------------------
     # Write output file
     # -------------------------------------------------------------------------
-    output_file_name = args.outputFn
-    join_type = args.joinType
 
-    f = open(output_file_name, "w")
+    f = open(arguments.output_file_name, "w")
     csvWriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
     )
     csvWriter.writerow(left_csv.header + right_csv.header)
 
     # -------------------------------------------------------------------------
-    if join_type == "left":
+    if arguments.join_type == "left":
 
         # Iterate through each row in the left table, try to find the matching
         # row in the right table if the matching row doesn't exist, then fill
@@ -182,7 +217,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif join_type == "right":
+    elif arguments.join_type == "right":
 
         # Similar to 'left' case
         for rightRow in right_csv.body:
@@ -195,7 +230,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif join_type == "inner":
+    elif arguments.join_type == "inner":
         # This join will only write rows for primary keys in the intersection
         # of the two primary key sets
         leftKeySet = set(left_primary_key_map.keys())
@@ -209,7 +244,7 @@ def main():
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
-    elif join_type == "full":
+    elif arguments.join_type == "full":
         # This join will only write rows for primary keys in the union of the
         # two primary key sets
         leftKeySet = set(left_primary_key_map.keys())
