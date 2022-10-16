@@ -36,20 +36,20 @@ def meta_load_csv_file(fn, pk):
         )
 
     # Find the index of the primary key column
-    pkIndex = header.index(pk)
+    pk_index = header.index(pk)
 
     # Make sure that our primary key column has all unique values
-    pkSet = set()
+    pk_set = set()
     for row in data:
-        if row[pkIndex] in pkSet:
+        if row[pk_index] in pk_set:
             raise ValueError(
                 f"Error: primary key column is not unique in {fn} "
-                f"(duplicate value found: {row[pkIndex]})"
+                f"(duplicate value found: {row[pk_index]})"
             )
         else:
-            pkSet.add(row[pkIndex])
+            pk_set.add(row[pk_index])
 
-    return header, data, pkIndex
+    return header, data, pk_index
 
 
 def do_args(argList, name):
