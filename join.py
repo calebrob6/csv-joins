@@ -13,7 +13,7 @@ import argparse
 
 def loadCSV(fn,header=False,DELIM="|",QUOTECHAR='"'):
     
-    f = open(fn,"rb")
+    f = open(fn,"r")
     csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
     
     if header:
@@ -100,7 +100,7 @@ def main():
     outputFn = args.outputFn
     joinType = args.joinType
 
-    f = open(outputFn, 'wb')
+    f = open(outputFn, 'w')
     csvWriter = csv.writer(f, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
     csvWriter.writerow(leftHeader + rightHeader)
 
