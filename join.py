@@ -137,13 +137,15 @@ def main():
     leftFn = args.leftFn
     leftPK = args.leftPK
 
-    leftHeader, leftData, leftKeyIndex = meta_load_csv_file(leftFn, leftPK)
+    builder = CSVRowsBuilder()
+    left_csv = builder.build_csv_rows(leftFn, leftPK)
+    # leftHeader, leftData, leftKeyIndex = meta_load_csv_file(leftFn, leftPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
     leftPKMap = {}
-    for i, row in enumerate(leftData):
-        leftPKMap[row[leftKeyIndex]] = i
+    for i, row in enumerate(left_csv.body):
+        leftPKMap[row[left_csv.primary_key_index]] = i
 
     # -------------------------------------------------------------------------
     # Load the right data file
@@ -169,7 +171,7 @@ def main():
     csvWriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
     )
-    csvWriter.writerow(leftHeader + rightHeader)
+    csvWriter.writerow(left_csv.header + rightHeader)
 
     # -------------------------------------------------------------------------
     if joinType == "left":
@@ -177,8 +179,8 @@ def main():
         # Iterate through each row in the left table, try to find the matching
         # row in the right table if the matching row doesn't exist, then fill
         # with 'null's, if it does, then copy it over
-        for leftRow in leftData:
-            leftRowPK = leftRow[leftKeyIndex]
+        for leftRow in left_csv.body:
+            leftRowPK = leftRow[left_csv.primary_key_index]
             rightRow = None
             if leftRowPK in rightPKMap:
                 rightRow = rightData[rightPKMap[leftRowPK]]
@@ -194,9 +196,9 @@ def main():
             rightRowPK = rightRow[rightKeyIndex]
             leftRow = None
             if rightRowPK in leftPKMap:
-                leftRow = leftData[leftPKMap[rightRowPK]]
+                leftRow = left_csv.body[leftPKMap[rightRowPK]]
             else:
-                leftRow = ["null"] * len(leftHeader)
+                leftRow = ["null"] * len(left_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
@@ -209,7 +211,7 @@ def main():
         newKeys = leftKeySet & rightKeySet
 
         for keyVal in newKeys:
-            leftRow = leftData[leftPKMap[keyVal]]
+            leftRow = left_csv.body[leftPKMap[keyVal]]
             rightRow = rightData[rightPKMap[keyVal]]
 
             csvWriter.writerow(leftRow + rightRow)
@@ -225,9 +227,9 @@ def main():
         for keyVal in newKeys:
             leftRow = None
             if keyVal in leftPKMap:
-                leftRow = leftData[leftPKMap[keyVal]]
+                leftRow = left_csv.body[leftPKMap[keyVal]]
             else:
-                leftRow = ["null"] * len(leftHeader)
+                leftRow = ["null"] * len(left_csv.header)
 
             rightRow = None
             if keyVal in rightPKMap:
