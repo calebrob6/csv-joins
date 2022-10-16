@@ -172,7 +172,7 @@ def main():
 
     f.close()
 
-    print "Finished in %0.4f seconds" % (time.time() - startTime)
+    print(f"Finished in {(time.time() - startTime):.4f} seconds")
 
 
 if __name__ == "__main__":
