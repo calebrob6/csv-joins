@@ -14,9 +14,10 @@ import argparse
 
 class CSVRows:
 
-    def __init__(self, rows, primary_key):
+    def __init__(self, rows, primary_key, file_name):
         self.__header, *self.__body = rows
         self.__primary_key = primary_key
+        self.__file_name = file_name
 
     @property
     def header(self):
