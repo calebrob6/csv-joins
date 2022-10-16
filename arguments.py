@@ -2,12 +2,12 @@ class Arguments:
 
     def __init__(self, args):
         self.__verbose = args.verbose
-        self.__left_file_name = args.leftFn
-        self.__left_primary_key = args.leftPK
-        self.__right_file_name = args.rightFn
-        self.__right_primary_key = args.rightPK
-        self.__output_file_name = args.outputFn
-        self.__join_type = args.joinType
+        self.__left_file_name = args.left_file_name
+        self.__left_primary_key = args.left_primary_key
+        self.__right_file_name = args.right_file_name
+        self.__right_primary_key = args.right_primary_key
+        self.__output_file_name = args.output_file_name
+        self.__join_type = args.join_type
 
     @property
     def verbose(self):

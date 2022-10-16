@@ -25,27 +25,33 @@ def configure_arguments(arguments, name):
         help="Show output from latex and dvipng commands",
         default=False,
     )
-    parser.add_argument("leftFn", type=str, help="Filename of left table")
     parser.add_argument(
-        "leftPK",
+        "left_file_name",
+        type=str,
+        help="Filename of left table"
+    )
+    parser.add_argument(
+        "left_primary_key",
         type=str,
         help="Name of column to use as the primary key for the left table",
     )
     parser.add_argument(
-        "rightFn", type=str, help="Filename of the right table"
+        "right_file_name",
+        type=str,
+        help="Filename of the right table"
     )
     parser.add_argument(
-        "rightPK",
+        "right_primary_key",
         type=str,
         help="Name of column to use as the primary key for the right table",
     )
-    parser.add_argument("outputFn", type=str, help="Output filename")
+    parser.add_argument("output_file_name", type=str, help="Output filename")
     parser.add_argument(
         "-t",
         "--type",
         type=str,
         action="store",
-        dest="joinType",
+        dest="join_type",
         choices=["left", "right", "inner", "full"],
         help="Type of join (default is 'left join')",
         default="left",
