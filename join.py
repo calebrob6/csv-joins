@@ -52,7 +52,7 @@ def meta_load_csv_file(fn, pk):
     return header, data, pkIndex
 
 
-def doArgs(argList, name):
+def do_args(argList, name):
     parser = argparse.ArgumentParser(description=name)
 
     parser.add_argument(
@@ -93,7 +93,7 @@ def doArgs(argList, name):
 
 def main():
 
-    args = doArgs(sys.argv[1:], "CSV join script")
+    args = do_args(sys.argv[1:], "CSV join script")
     startTime = float(time.time())
 
     # -------------------------------------------------------------------------
