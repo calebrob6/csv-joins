@@ -7,7 +7,7 @@ class Arguments:
         self.__right_file_name = args.right_file_name
         self.__right_primary_key = args.right_primary_key
         self.__output_file_name = args.output_file_name
-        self.__join_type = args.join_type
+        self.__join_strategy = args.join_strategy
 
     @property
     def verbose(self):
@@ -34,5 +34,5 @@ class Arguments:
         return self.__output_file_name
 
     @property
-    def join_type(self):
-        return self.__join_type
+    def join_strategy(self):
+        return self.__join_strategy
