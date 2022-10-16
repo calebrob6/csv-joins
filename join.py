@@ -67,8 +67,8 @@ def load_csv(file_name):
         return [row for row in csv_reader]
 
 
-def meta_load_csv_file(fn, pk):
-    csv_rows = CSVRows(load_csv(fn), pk, fn)
+def meta_load_csv_file(file_name, primary_key):
+    csv_rows = CSVRows(load_csv(file_name), primary_key, file_name)
 
     csv_rows.check_if_header_has_primary_key_column()
     csv_rows.check_if_all_values_in_primary_key_column_are_unique()
