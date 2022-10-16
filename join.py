@@ -17,7 +17,7 @@ def loadCSV(fn,header=False,DELIM="|",QUOTECHAR='"'):
     csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
     
     if header:
-        headerLine = csvReader.next()
+        headerLine = next(csvReader)
 
     data = []
     for row in csvReader:
