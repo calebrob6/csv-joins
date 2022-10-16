@@ -28,7 +28,7 @@ def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
 
 
 def meta_load_csv_file(fn, pk):
-    header, data = load_csv(fn, header=True, DELIM=",")
+    header, data = load_csv(fn, header=True, delimiter=",")
 
     if pk not in header:
         raise ValueError(
