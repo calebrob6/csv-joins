@@ -12,18 +12,18 @@ import csv
 import argparse
 
 
-def load_csv(fn, header=False, DELIM="|", QUOTECHAR='"'):
+def load_csv(file_name, header=False, delimiter="|", quotechar='"'):
 
-    with open(fn, "r") as f:
-        csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
+    with open(file_name, "r") as f:
+        csv_reader = csv.reader(f, delimiter=delimiter, quotechar=quotechar)
 
         if header:
-            headerLine = next(csvReader)
+            header_line = next(csv_reader)
 
-        data = [row for row in csvReader]
+        data = [row for row in csv_reader]
 
     if header:
-        return headerLine, data
+        return header_line, data
     else:
         return data
 
