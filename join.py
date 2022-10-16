@@ -138,6 +138,7 @@ def main():
     leftPK = args.leftPK
 
     builder = CSVRowsBuilder()
+
     left_csv = builder.build_csv_rows(leftFn, leftPK)
     # leftHeader, leftData, leftKeyIndex = meta_load_csv_file(leftFn, leftPK)
 
@@ -153,13 +154,14 @@ def main():
     rightFn = args.rightFn
     rightPK = args.rightPK
 
-    rightHeader, rightData, rightKeyIndex = meta_load_csv_file(rightFn, rightPK)
+    right_csv = builder.build_csv_rows(rightFn, rightPK)
+    # rightHeader, rightData, rightKeyIndex = meta_load_csv_file(rightFn, rightPK)
 
     # Map the primary keys to their row index so we can look up keys from the
     # other table in constant time
     rightPKMap = {}
-    for i, row in enumerate(rightData):
-        rightPKMap[row[rightKeyIndex]] = i
+    for i, row in enumerate(right_csv.body):
+        rightPKMap[row[right_csv.primary_key_index]] = i
 
     # -------------------------------------------------------------------------
     # Write output file
@@ -171,7 +173,7 @@ def main():
     csvWriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
     )
-    csvWriter.writerow(left_csv.header + rightHeader)
+    csvWriter.writerow(left_csv.header + right_csv.header)
 
     # -------------------------------------------------------------------------
     if joinType == "left":
@@ -183,17 +185,17 @@ def main():
             leftRowPK = leftRow[left_csv.primary_key_index]
             rightRow = None
             if leftRowPK in rightPKMap:
-                rightRow = rightData[rightPKMap[leftRowPK]]
+                rightRow = right_csv.body[rightPKMap[leftRowPK]]
             else:
-                rightRow = ["null"] * len(rightHeader)
+                rightRow = ["null"] * len(right_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
     elif joinType == "right":
 
         # Similar to 'left' case
-        for rightRow in rightData:
-            rightRowPK = rightRow[rightKeyIndex]
+        for rightRow in right_csv.body:
+            rightRowPK = rightRow[right_csv.primary_key_index]
             leftRow = None
             if rightRowPK in leftPKMap:
                 leftRow = left_csv.body[leftPKMap[rightRowPK]]
@@ -212,7 +214,7 @@ def main():
 
         for keyVal in newKeys:
             leftRow = left_csv.body[leftPKMap[keyVal]]
-            rightRow = rightData[rightPKMap[keyVal]]
+            rightRow = right_csv.body[rightPKMap[keyVal]]
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
@@ -233,9 +235,9 @@ def main():
 
             rightRow = None
             if keyVal in rightPKMap:
-                rightRow = rightData[rightPKMap[keyVal]]
+                rightRow = right_csv.body[rightPKMap[keyVal]]
             else:
-                rightRow = ["null"] * len(rightHeader)
+                rightRow = ["null"] * len(right_csv.header)
 
             csvWriter.writerow(leftRow + rightRow)
     # -------------------------------------------------------------------------
