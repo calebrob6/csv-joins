@@ -74,18 +74,11 @@ class Main:
             arguments.left_primary_key
         )
 
-        # -------------------------------------------------------------------------
-        # Load the right data file
-        # -------------------------------------------------------------------------
-
         right_csv = self.__builder.build_csv_rows(
             arguments.right_file_name,
             arguments.right_primary_key
         )
 
-        # -------------------------------------------------------------------------
-        # Write output file
-        # -------------------------------------------------------------------------
 
         output_header = left_csv.header + right_csv.header
 
