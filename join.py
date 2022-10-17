@@ -61,31 +61,26 @@ def configure_arguments(arguments, name):
     return parser.parse_args(arguments)
 
 
-
 class Main:
 
     def __init__(self):
         self.__builder = CSVRowsBuilder()
+        self.__csv_handler = CSVHandler()
 
     def __call__(self, arguments):
-
         left_csv = self.__builder.build_csv_rows(
             arguments.left_file_name,
             arguments.left_primary_key
         )
-
         right_csv = self.__builder.build_csv_rows(
             arguments.right_file_name,
             arguments.right_primary_key
         )
 
-
         output_header = left_csv.header + right_csv.header
 
         factory = JoinFactory()
-
         strategy = factory.join_strategy(arguments.join_strategy)
-
         output_rows = strategy.join(left_csv, right_csv)
 
         output_csv = CSVRows(
@@ -95,9 +90,7 @@ class Main:
             arguments.output_file_name
         )
 
-        csv_handler = CSVHandler()
-
-        csv_handler.save_in_csv(output_csv)
+        self.__csv_handler.save_in_csv(output_csv)
 
 
 if __name__ == "__main__":
