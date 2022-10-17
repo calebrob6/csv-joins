@@ -61,53 +61,52 @@ def configure_arguments(arguments, name):
     return parser.parse_args(arguments)
 
 
-def main():
+class Main:
 
-    args = configure_arguments(sys.argv[1:], "CSV join script")
+    def __call__(self, arguments):
+        builder = CSVRowsBuilder()
 
-    arguments = Arguments(args)
-    # -------------------------------------------------------------------------
-    # Load the left data file
-    # -------------------------------------------------------------------------
+        left_csv = builder.build_csv_rows(
+            arguments.left_file_name,
+            arguments.left_primary_key
+        )
 
-    builder = CSVRowsBuilder()
+        # -------------------------------------------------------------------------
+        # Load the right data file
+        # -------------------------------------------------------------------------
 
-    left_csv = builder.build_csv_rows(
-        arguments.left_file_name,
-        arguments.left_primary_key
-    )
+        right_csv = builder.build_csv_rows(
+            arguments.right_file_name,
+            arguments.right_primary_key
+        )
 
-    # -------------------------------------------------------------------------
-    # Load the right data file
-    # -------------------------------------------------------------------------
+        # -------------------------------------------------------------------------
+        # Write output file
+        # -------------------------------------------------------------------------
 
-    right_csv = builder.build_csv_rows(
-        arguments.right_file_name,
-        arguments.right_primary_key
-    )
+        output_header = left_csv.header + right_csv.header
 
-    # -------------------------------------------------------------------------
-    # Write output file
-    # -------------------------------------------------------------------------
+        factory = JoinFactory()
 
-    output_header = left_csv.header + right_csv.header
+        strategy = factory.join_strategy(arguments.join_strategy)
 
-    factory = JoinFactory()
+        output_rows = strategy.join(left_csv, right_csv)
 
-    strategy = factory.join_strategy(arguments.join_strategy)
+        output_csv = CSVRows(
+            output_header,
+            output_rows,
+            'a',
+            arguments.output_file_name
+        )
 
-    output_rows = strategy.join(left_csv, right_csv)
+        csv_handler = CSVHandler()
 
-    output_csv = CSVRows(
-        output_header,
-        output_rows,
-        'a',
-        arguments.output_file_name
-    )
+        csv_handler.save_in_csv(output_csv)
 
-    csv_handler = CSVHandler()
-
-    csv_handler.save_in_csv(output_csv)
 
 if __name__ == "__main__":
-    main()
+    args = configure_arguments(sys.argv[1:], "CSV join script")
+    arguments = Arguments(args)
+
+    main = Main()
+    main(arguments)
