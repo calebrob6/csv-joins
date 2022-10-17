@@ -68,6 +68,11 @@ class Main:
         self.__csv_handler = CSVHandler()
 
     def __call__(self, arguments):
+        left_csv, right_csv = self.create_left_and_right_instances(arguments)
+        output_csv = self.join_csvs(arguments, left_csv, right_csv)
+        self.save_in_csv(output_csv)
+
+    def create_left_and_right_instances(self, arguments):
         left_csv = self.__builder.build_csv_rows(
             arguments.left_file_name,
             arguments.left_primary_key
@@ -76,20 +81,23 @@ class Main:
             arguments.right_file_name,
             arguments.right_primary_key
         )
+        return left_csv, right_csv
 
-        output_header = left_csv.header + right_csv.header
-
+    def join_csvs(self, arguments, left_csv, right_csv):
         factory = JoinFactory()
         strategy = factory.join_strategy(arguments.join_strategy)
         output_rows = strategy.join(left_csv, right_csv)
 
+        output_header = left_csv.header + right_csv.header
         output_csv = CSVRows(
             output_header,
             output_rows,
             'a',
             arguments.output_file_name
         )
+        return output_csv
 
+    def save_in_csv(self, output_csv):
         self.__csv_handler.save_in_csv(output_csv)
 
 
