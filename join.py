@@ -61,12 +61,15 @@ def configure_arguments(arguments, name):
     return parser.parse_args(arguments)
 
 
+
 class Main:
 
-    def __call__(self, arguments):
-        builder = CSVRowsBuilder()
+    def __init__(self):
+        self.__builder = CSVRowsBuilder()
 
-        left_csv = builder.build_csv_rows(
+    def __call__(self, arguments):
+
+        left_csv = self.__builder.build_csv_rows(
             arguments.left_file_name,
             arguments.left_primary_key
         )
@@ -75,7 +78,7 @@ class Main:
         # Load the right data file
         # -------------------------------------------------------------------------
 
-        right_csv = builder.build_csv_rows(
+        right_csv = self.__builder.build_csv_rows(
             arguments.right_file_name,
             arguments.right_primary_key
         )
