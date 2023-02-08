@@ -11,13 +11,18 @@ import time
 import csv
 import argparse
 
-def loadCSV(fn,header=False,DELIM="|",QUOTECHAR='"'):
+INNER_JOIN = 'inner'
+FULL_JOIN = 'full'
+LEFT_JOIN = 'left'
+RIGHT_JOIN = 'right'
+
+def loadCSV(fn,header=False, DELIM="|", QUOTECHAR='"'):
     
-    f = open(fn,"rb")
+    f = open(fn,"r")
     csvReader = csv.reader(f, delimiter=DELIM, quotechar=QUOTECHAR)
     
     if header:
-        headerLine = csvReader.next()
+        headerLine = next(iter(csvReader))
 
     data = []
     for row in csvReader:
@@ -76,103 +81,108 @@ def main():
 
     leftHeader, leftData, leftKeyIndex = metaLoadCSVFile(leftFn, leftPK)
 
-    # Map the primary keys to their row index so we can look up keys from the other table in constant time
-    leftPKMap = {}
-    for i,row in enumerate(leftData):
-        leftPKMap[row[leftKeyIndex]] = i
+
 
     #-------------------------------------------------------------------------------------------
     # Load the right data file
     #-------------------------------------------------------------------------------------------
+
     rightFn = args.rightFn
     rightPK = args.rightPK
-
     rightHeader, rightData, rightKeyIndex = metaLoadCSVFile(rightFn, rightPK)
-
-    # Map the primary keys to their row index so we can look up keys from the other table in constant time
-    rightPKMap = {}
-    for i,row in enumerate(rightData):
-        rightPKMap[row[rightKeyIndex]] = i
-
-    #-------------------------------------------------------------------------------------------
-    # Write output file
-    #-------------------------------------------------------------------------------------------
     outputFn = args.outputFn
     joinType = args.joinType
 
-    f = open(outputFn, 'wb')
-    csvWriter = csv.writer(f, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    csvWriter.writerow(leftHeader + rightHeader)
+    doJoin(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn)
 
-    #-------------------------------------------------------------------------------------------
-    if joinType == "left":
+    print ("Finished in %0.4f seconds" % (time.time() - startTime))
 
-        # Iterate through each row in the left table, try to find the matching row in the right table
-        # if the matching row doesn't exist, then fill with 'null's, if it does, then copy it over
-        for leftRow in leftData:
-            leftRowPK = leftRow[leftKeyIndex]
-            rightRow = None
-            if leftRowPK in rightPKMap:
-                rightRow = rightData[rightPKMap[leftRowPK]]
-            else:
-                rightRow = ["null"] * len(rightHeader)
 
-            csvWriter.writerow(leftRow + rightRow)
-    #-------------------------------------------------------------------------------------------
-    elif joinType == "right":
+def doJoin(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn):
 
-        # Similar to 'left' case
-        for rightRow in rightData:
-            rightRowPK = rightRow[rightKeyIndex]
-            leftRow = None
-            if rightRowPK in leftPKMap:
-                leftRow = leftData[leftPKMap[rightRowPK]]
-            else:
-                leftRow = ["null"] * len(leftHeader)
+    # Map the primary keys to their row index so we can look up keys from the other table in constant time
+    leftPKMap = {}
+    for i, row in enumerate(leftData):
+        leftPKMap[row[leftKeyIndex]] = i
 
-            csvWriter.writerow(leftRow + rightRow)
-    #-------------------------------------------------------------------------------------------
-    elif joinType == "inner":
-        # This join will only write rows for primary keys in the intersection of the two primary key sets
-        leftKeySet = set(leftPKMap.keys())
-        rightKeySet = set(rightPKMap.keys())
+    # Map the primary keys to their row index so we can look up keys from the other table in constant time
+    rightPKMap = {}
+    for i, row in enumerate(rightData):
+        rightPKMap[row[rightKeyIndex]] = i
+    # -------------------------------------------------------------------------------------------
+    # Write output file
+    # -------------------------------------------------------------------------------------------
+    with  open(outputFn, 'w') as f:
+        csvWriter = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csvWriter.writerow(leftHeader + rightHeader)
 
-        newKeys = leftKeySet & rightKeySet
+        # -------------------------------------------------------------------------------------------
+        if joinType == "left":
 
-        for keyVal in newKeys:
-            leftRow = leftData[leftPKMap[keyVal]]
-            rightRow = rightData[rightPKMap[keyVal]]
+            # Iterate through each row in the left table, try to find the matching row in the right table
+            # if the matching row doesn't exist, then fill with 'null's, if it does, then copy it over
+            for leftRow in leftData:
+                leftRowPK = leftRow[leftKeyIndex]
+                rightRow = None
+                if leftRowPK in rightPKMap:
+                    rightRow = rightData[rightPKMap[leftRowPK]]
+                else:
+                    rightRow = ["null"] * len(rightHeader)
 
-            csvWriter.writerow(leftRow + rightRow)
-    #-------------------------------------------------------------------------------------------
-    elif joinType == "full":
-        # This join will only write rows for primary keys in the union of the two primary key sets
-        leftKeySet = set(leftPKMap.keys())
-        rightKeySet = set(rightPKMap.keys())
+                csvWriter.writerow(leftRow + rightRow)
+        # -------------------------------------------------------------------------------------------
+        elif joinType == "right":
 
-        newKeys = leftKeySet | rightKeySet
+            # Similar to 'left' case
+            for rightRow in rightData:
+                rightRowPK = rightRow[rightKeyIndex]
+                leftRow = None
+                if rightRowPK in leftPKMap:
+                    leftRow = leftData[leftPKMap[rightRowPK]]
+                else:
+                    leftRow = ["null"] * len(leftHeader)
 
-        for keyVal in newKeys:
-            leftRow = None
-            if keyVal in leftPKMap:
+                csvWriter.writerow(leftRow + rightRow)
+        # -------------------------------------------------------------------------------------------
+        elif joinType == "inner":
+            # This join will only write rows for primary keys in the intersection of the two primary key sets
+            leftKeySet = set(leftPKMap.keys())
+            rightKeySet = set(rightPKMap.keys())
+
+            newKeys = leftKeySet & rightKeySet
+
+            for keyVal in newKeys:
                 leftRow = leftData[leftPKMap[keyVal]]
-            else:
-                leftRow = ["null"] * len(leftHeader)
-            
-            rightRow = None
-            if keyVal in rightPKMap:
                 rightRow = rightData[rightPKMap[keyVal]]
-            else:
-                rightRow = ["null"] * len(rightHeader)
 
-            csvWriter.writerow(leftRow + rightRow)
-    #-------------------------------------------------------------------------------------------
-    else:
-        raise Exception("This shouldn't happen")
+                csvWriter.writerow(leftRow + rightRow)
+        # -------------------------------------------------------------------------------------------
+        elif joinType == "full":
+            # This join will only write rows for primary keys in the union of the two primary key sets
+            leftKeySet = set(leftPKMap.keys())
+            rightKeySet = set(rightPKMap.keys())
 
-    f.close()
+            newKeys = leftKeySet | rightKeySet
 
-    print "Finished in %0.4f seconds" % (time.time() - startTime)
+            for keyVal in newKeys:
+                leftRow = None
+                if keyVal in leftPKMap:
+                    leftRow = leftData[leftPKMap[keyVal]]
+                else:
+                    leftRow = ["null"] * len(leftHeader)
+
+                rightRow = None
+                if keyVal in rightPKMap:
+                    rightRow = rightData[rightPKMap[keyVal]]
+                else:
+                    rightRow = ["null"] * len(rightHeader)
+
+                csvWriter.writerow(leftRow + rightRow)
+        # -------------------------------------------------------------------------------------------
+        else:
+            raise Exception("This shouldn't happen")
+
+        f.close()
 
 
 if __name__ == "__main__":
