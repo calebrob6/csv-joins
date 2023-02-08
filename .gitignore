@@ -1,4 +1,5 @@
 .vscode/
-a.csv
-b.csv
+.lh/
+.history/
 output.csv
+temp.csv

@@ -65,7 +65,7 @@ def doArgs(argList, name):
     parser.add_argument("rightPK", type=str, help="Name of column to use as the primary key for the right table")
     parser.add_argument("outputFn", type=str, help="Output filename")
     parser.add_argument("-t", "--type",  type=str, action="store", dest="joinType", choices=["left","right","inner","full"], help="Type of join (default is 'left join')", default="left")
-
+    # parser.add_argument("-c", "--ignorecase", type=bool, action="store", dest="ignore_case", help="ignore case for keys? default=False", default=False)
     return parser.parse_args(argList)
 
 def main():
@@ -78,37 +78,46 @@ def main():
     #-------------------------------------------------------------------------------------------
     leftFn = args.leftFn
     leftPK = args.leftPK
-
-    leftHeader, leftData, leftKeyIndex = metaLoadCSVFile(leftFn, leftPK)
-
-
-
-    #-------------------------------------------------------------------------------------------
-    # Load the right data file
-    #-------------------------------------------------------------------------------------------
-
     rightFn = args.rightFn
     rightPK = args.rightPK
-    rightHeader, rightData, rightKeyIndex = metaLoadCSVFile(rightFn, rightPK)
+
     outputFn = args.outputFn
     joinType = args.joinType
+    ignore_case = True
 
-    doJoin(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn)
+    joinCsvFiles(joinType, leftFn, leftPK, outputFn, rightFn, rightPK, ignore_case)
 
     print ("Finished in %0.4f seconds" % (time.time() - startTime))
 
 
-def doJoin(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn):
+def joinCsvFiles(joinType, leftFn, leftPK, outputFn, rightFn, rightPK, ignore_case=False):
+    leftHeader, leftData, leftKeyIndex = metaLoadCSVFile(leftFn, leftPK)
+    rightHeader, rightData, rightKeyIndex = metaLoadCSVFile(rightFn, rightPK)
+    # -------------------------------------------------------------------------------------------
+    # Load the right data file
+    # -------------------------------------------------------------------------------------------
+    _join(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn, ignore_case=ignore_case)
+
+
+def _join(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader, rightKeyIndex, outputFn,
+          ignore_case=False):
 
     # Map the primary keys to their row index so we can look up keys from the other table in constant time
     leftPKMap = {}
     for i, row in enumerate(leftData):
-        leftPKMap[row[leftKeyIndex]] = i
+        if ignore_case:
+            leftPKMap[row[leftKeyIndex].lower()] = i
+        else:
+            leftPKMap[row[leftKeyIndex]] = i
 
     # Map the primary keys to their row index so we can look up keys from the other table in constant time
     rightPKMap = {}
     for i, row in enumerate(rightData):
-        rightPKMap[row[rightKeyIndex]] = i
+        if ignore_case:
+            rightPKMap[row[rightKeyIndex].lower()] = i
+        else:
+            rightPKMap[row[rightKeyIndex]] = i
+
     # -------------------------------------------------------------------------------------------
     # Write output file
     # -------------------------------------------------------------------------------------------
@@ -122,20 +131,27 @@ def doJoin(joinType, leftData, leftHeader, leftKeyIndex, rightData, rightHeader,
             # Iterate through each row in the left table, try to find the matching row in the right table
             # if the matching row doesn't exist, then fill with 'null's, if it does, then copy it over
             for leftRow in leftData:
-                leftRowPK = leftRow[leftKeyIndex]
+                if ignore_case:
+                   leftRowPK = str(leftRow[leftKeyIndex]).lower()
+                else:
+                    leftRowPK = leftRow[leftKeyIndex]
+
                 rightRow = None
-                if leftRowPK in rightPKMap:
+                if leftRowPK  in rightPKMap:
                     rightRow = rightData[rightPKMap[leftRowPK]]
                 else:
                     rightRow = ["null"] * len(rightHeader)
-
                 csvWriter.writerow(leftRow + rightRow)
         # -------------------------------------------------------------------------------------------
         elif joinType == "right":
 
             # Similar to 'left' case
             for rightRow in rightData:
-                rightRowPK = rightRow[rightKeyIndex]
+                if ignore_case:
+                    rightRowPK = str(rightRow[rightKeyIndex]).lower()
+                else:
+                    rightRowPK = rightRow[rightKeyIndex]
+
                 leftRow = None
                 if rightRowPK in leftPKMap:
                     leftRow = leftData[leftPKMap[rightRowPK]]

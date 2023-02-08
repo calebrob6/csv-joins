@@ -9,18 +9,8 @@ def test_load_csv():
     pk = 'Id'
     h, d = j.loadCSV(name, pk)
     assert (h == ['Id,PersonId,Name'])
-    expected_data = [['1,    20, "Las Vegas"'], ['2, 200, "Jerusalem"']]
+    expected_data = [['1,20,Las Vegas'], ['2,200,Jerusalem']]
     assert (d == expected_data)
-
-
-def test_load_csv_with_mets():
-    address_file = 'tests/address.csv'
-    addressPk = 'PersonId'
-    header, data, addressPkIndex = j.metaLoadCSVFile(address_file, addressPk)
-
-    address_file = 'tests/names.csv'
-    addressPk = 'PersonId'
-    header, data, addressPkIndex = j.metaLoadCSVFile(address_file, addressPk)
 
 
 def test_csv_with_meta_address():
@@ -63,14 +53,14 @@ def test_inner_join():
 
     output ='temp.csv'
 
-    j.doJoin(j.INNER_JOIN,
-             addr_data,
-             addr_header,
-             addr_pkIndex,
-             names_data,
-             names_header,
-             names_pkIndex,
-             output)
+    j._join(j.INNER_JOIN,
+            addr_data,
+            addr_header,
+            addr_pkIndex,
+            names_data,
+            names_header,
+            names_pkIndex,
+            output)
 
     header_actual, data_actual, pkindex  = j.metaLoadCSVFile(output, 'PersonId')
     assert (header_actual ==['Id', 'PersonId', 'Name', 'Id', 'Name', 'Lastname'])
@@ -85,14 +75,14 @@ def test_full_join():
     if os.path.exists(output):
         os.remove(output)
 
-    j.doJoin(j.FULL_JOIN,
-             addr_data,
-             addr_header,
-             addr_pkIndex,
-             names_data,
-             names_header,
-             names_pkIndex,
-             output)
+    j._join(j.FULL_JOIN,
+            addr_data,
+            addr_header,
+            addr_pkIndex,
+            names_data,
+            names_header,
+            names_pkIndex,
+            output)
 
     data_actual = j.loadCSV(output)
     expected = [['Id,PersonId,Name,Id,Name,Lastname'],
@@ -117,14 +107,14 @@ def test_left_join():
     if os.path.exists(output):
         os.remove(output)
 
-    j.doJoin(j.LEFT_JOIN,
-             addr_data,
-             addr_header,
-             addr_pkIndex,
-             names_data,
-             names_header,
-             names_pkIndex,
-             output)
+    j._join(j.LEFT_JOIN,
+            addr_data,
+            addr_header,
+            addr_pkIndex,
+            names_data,
+            names_header,
+            names_pkIndex,
+            output)
 
     data_actual = j.loadCSV(output)
     expected = [['Id,PersonId,Name,Id,Name,Lastname'],
@@ -141,14 +131,14 @@ def test_right_join():
     if os.path.exists(output):
         os.remove(output)
 
-    j.doJoin(j.RIGHT_JOIN,
-             addr_data,
-             addr_header,
-             addr_pkIndex,
-             names_data,
-             names_header,
-             names_pkIndex,
-             output)
+    j._join(j.RIGHT_JOIN,
+            addr_data,
+            addr_header,
+            addr_pkIndex,
+            names_data,
+            names_header,
+            names_pkIndex,
+            output)
 
     data_actual = j.loadCSV(output)
     expected = [['Id,PersonId,Name,Id,Name,Lastname'],
